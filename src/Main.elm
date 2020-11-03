@@ -1,8 +1,11 @@
-module Main exposing (..)
+port module Main exposing (..)
 
 import Browser
-import Html exposing (Html, text, div, h1, img)
-import Html.Attributes exposing (src)
+import Html exposing (Html, div)
+import Html.Attributes exposing (id)
+import Process
+import Task exposing (Task)
+
 
 
 ---- MODEL ----
@@ -14,7 +17,15 @@ type alias Model =
 
 init : ( Model, Cmd Msg )
 init =
-    ( {}, Cmd.none )
+    ( {}, Task.perform DataFetched fetchData )
+
+
+fetchData : Task Never String
+fetchData =
+    Process.sleep 2000 |> Task.map (always "test")
+
+
+port sendData : String -> Cmd msg
 
 
 
@@ -22,12 +33,14 @@ init =
 
 
 type Msg
-    = NoOp
+    = DataFetched String
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-    ( model, Cmd.none )
+    case msg of
+        DataFetched data ->
+            ( model, sendData data )
 
 
 
@@ -37,9 +50,7 @@ update msg model =
 view : Model -> Html Msg
 view model =
     div []
-        [ img [ src "/logo.svg" ] []
-        , h1 [] [ text "Your Elm App is working!" ]
-        ]
+        [ div [ id "network" ] [] ]
 
 
 
